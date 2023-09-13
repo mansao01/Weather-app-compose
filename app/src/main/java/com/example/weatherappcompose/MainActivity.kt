@@ -2,6 +2,7 @@ package com.example.weatherappcompose
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Looper
@@ -13,10 +14,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,66 +35,77 @@ class MainActivity : ComponentActivity() {
     private var locationCallback: LocationCallback? = null
     private var fusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequired = false
+    private var latLong by mutableStateOf(LatLong(0.0, 0.0))
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             WeatherAppComposeTheme {
                 val context = LocalContext.current
-                var latLong by remember {
-                    mutableStateOf(LatLong(latitude = 0.toDouble(), longitude = 0.toDouble()))
-                }
-                fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-                locationCallback = object : LocationCallback() {
-                    override fun onLocationResult(p0: LocationResult) {
-                        for (lo in p0.locations) {
-                            // Update UI with location data
-                            latLong = LatLong(lo.latitude, lo.longitude)
-                        }
-                    }
-                }
 
-                val permissions = arrayOf(
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
+                SetupLocationServices(context)
 
-                // Check if location permissions are granted
-                if (permissions.all {
-                        ContextCompat.checkSelfPermission(
-                            context,
-                            it
-                        ) == PackageManager.PERMISSION_GRANTED
-                    }) {
-                    // Start location updates
-                    startLocationUpdates()
-                } else {
-                    // Request location permissions
-                    val launcherMultiplePermissions = rememberLauncherForActivityResult(
-                        ActivityResultContracts.RequestMultiplePermissions()
-                    ) { permissionsMap ->
-                        val areGranted = permissionsMap.values.reduce { acc, next -> acc && next }
-                        if (areGranted) {
-                            locationRequired = true
-                            startLocationUpdates()
-                            Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    LaunchedEffect(Unit){
-
-                        launcherMultiplePermissions.launch(permissions)
-                    }
-                }
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-
-                    WeatherApp(latLong =latLong)
-
+                    WeatherApp(latLong = latLong)
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun SetupLocationServices(context: Context) {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        locationCallback = createLocationCallback()
+
+        val permissions = arrayOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+
+        if (hasLocationPermissions(context, permissions)) {
+            startLocationUpdates()
+        } else {
+            RequestLocationPermissions(context, permissions)
+        }
+    }
+
+    private fun createLocationCallback(): LocationCallback {
+        return object : LocationCallback() {
+            override fun onLocationResult(p0: LocationResult) {
+                p0.locations.firstOrNull()?.let { location ->
+                    // Update UI with location data
+                    latLong = LatLong(location.latitude, location.longitude)
+                }
+            }
+        }
+    }
+
+    private fun hasLocationPermissions(context: Context, permissions: Array<String>): Boolean {
+        return permissions.all {
+            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    @Composable
+    private fun RequestLocationPermissions(context: Context, permissions: Array<String>) {
+        val launcherMultiplePermissions = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissionsMap ->
+            val areGranted = permissionsMap.values.all { it }
+            if (areGranted) {
+                locationRequired = true
+                startLocationUpdates()
+                Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            launcherMultiplePermissions.launch(permissions)
         }
     }
 
@@ -125,4 +137,3 @@ class MainActivity : ComponentActivity() {
         locationCallback?.let { fusedLocationClient?.removeLocationUpdates(it) }
     }
 }
-
