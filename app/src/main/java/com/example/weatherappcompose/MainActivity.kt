@@ -4,6 +4,8 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
 import android.os.Bundle
 import android.os.Looper
 import android.widget.Toast
@@ -22,7 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import com.example.weatherappcompose.data.model.LatLong
+import com.example.weatherappcompose.data.model.LocationModel
 import com.example.weatherappcompose.ui.WeatherApp
 import com.example.weatherappcompose.ui.theme.WeatherAppComposeTheme
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -30,12 +32,16 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import java.util.Locale
+
 
 class MainActivity : ComponentActivity() {
     private var locationCallback: LocationCallback? = null
     private var fusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequired = false
-    private var latLong by mutableStateOf(LatLong(0.0, 0.0))
+    private var locationModel by mutableStateOf(
+        LocationModel(0.0, 0.0, "", "", "", "")
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +55,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    WeatherApp(latLong = latLong)
+                    WeatherApp(locationModel = locationModel)
                 }
             }
         }
@@ -74,10 +80,11 @@ class MainActivity : ComponentActivity() {
 
     private fun createLocationCallback(): LocationCallback {
         return object : LocationCallback() {
-            override fun onLocationResult(p0: LocationResult) {
-                p0.locations.firstOrNull()?.let { location ->
+            override fun onLocationResult(locationResult: LocationResult) {
+                locationResult.locations.firstOrNull()?.let { location ->
                     // Update UI with location data
-                    latLong = LatLong(location.latitude, location.longitude)
+                    val updatedLocation = getLocationDetails(location.latitude, location.longitude)
+                    locationModel = updatedLocation
                 }
             }
         }
@@ -122,6 +129,29 @@ class MainActivity : ComponentActivity() {
                 it,
                 Looper.getMainLooper()
             )
+        }
+    }
+
+    private fun getLocationDetails(latitude: Double, longitude: Double): LocationModel {
+        val geocoder = Geocoder(this, Locale.getDefault())
+
+        try {
+            val addresses: MutableList<Address>? = geocoder.getFromLocation(latitude, longitude, 1)
+
+            return if (addresses!!.isNotEmpty()) {
+                val address = addresses[0]
+                val addressText = address.getAddressLine(0) ?: ""
+                val city = address.locality ?: ""
+                val state = address.adminArea ?: ""
+                val country = address.countryName ?: ""
+
+                LocationModel(latitude, longitude, addressText, city, state, country)
+            } else {
+                LocationModel(latitude, longitude, "", "", "", "")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return LocationModel(latitude, longitude, "Error retrieving location details", "", "", "")
         }
     }
 
