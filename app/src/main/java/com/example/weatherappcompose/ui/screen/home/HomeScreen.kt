@@ -19,8 +19,10 @@ fun HomeScreen(
     locationModel: LocationModel,
     homeViewModel: HomeViewModel
 ) {
-    LaunchedEffect(Unit) {
-        homeViewModel.getWeather("${locationModel.latitude},${locationModel.longitude}")
+    if (locationModel.latitude != 0.0){
+        LaunchedEffect(Unit) {
+            homeViewModel.getWeather("${locationModel.latitude},${locationModel.longitude}")
+        }
     }
 
     when (uiState) {

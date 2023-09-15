@@ -137,7 +137,6 @@ class MainActivity : ComponentActivity() {
 
         try {
             val addresses: MutableList<Address>? = geocoder.getFromLocation(latitude, longitude, 1)
-
             return if (addresses!!.isNotEmpty()) {
                 val address = addresses[0]
                 val addressText = address.getAddressLine(0) ?: ""
