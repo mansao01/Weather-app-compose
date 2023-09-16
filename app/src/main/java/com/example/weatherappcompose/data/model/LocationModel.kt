@@ -6,5 +6,7 @@ data class LocationModel(
     val address: String,
     val city: String,
     val state: String,
-    val country: String
+    val country: String,
+    val subCity:String,
+    val village:String
 )

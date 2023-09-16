@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
     private var fusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequired = false
     private var locationModel by mutableStateOf(
-        LocationModel(0.0, 0.0, "", "", "", "")
+        LocationModel(0.0, 0.0, "", "", "", "", "", "")
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -143,14 +143,34 @@ class MainActivity : ComponentActivity() {
                 val city = address.locality ?: ""
                 val state = address.adminArea ?: ""
                 val country = address.countryName ?: ""
+                val subCity = address.subAdminArea ?: "" //kabupaten
+                val village = address.subLocality ?: "" //desa
 
-                LocationModel(latitude, longitude, addressText, city, state, country)
+                LocationModel(
+                    latitude,
+                    longitude,
+                    addressText,
+                    city,
+                    state,
+                    country,
+                    subCity,
+                    village
+                )
             } else {
-                LocationModel(latitude, longitude, "", "", "", "")
+                LocationModel(latitude, longitude, "", "", "", "", "", "")
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            return LocationModel(latitude, longitude, "Error retrieving location details", "", "", "")
+            return LocationModel(
+                latitude,
+                longitude,
+                "Error retrieving location details",
+                "",
+                "",
+                "",
+                "",
+                ""
+            )
         }
     }
 
