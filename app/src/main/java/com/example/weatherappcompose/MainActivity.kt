@@ -24,9 +24,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import com.example.weatherappcompose.ui.theme.WeatherAppComposeTheme
 import com.example.weatherappcompose.data.model.LocationModel
 import com.example.weatherappcompose.ui.WeatherApp
-import com.example.weatherappcompose.ui.theme.WeatherAppComposeTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest

@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
@@ -23,9 +25,13 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.weatherappcompose.data.model.LocationModel
+import com.example.weatherappcompose.data.network.response.Forecast
+import com.example.weatherappcompose.data.network.response.ForecastdayItem
 import com.example.weatherappcompose.data.network.response.FullWeatherResponse
 import com.example.weatherappcompose.ui.common.HomeUiState
+import com.example.weatherappcompose.ui.component.ForecastListItem
 import com.example.weatherappcompose.ui.component.LoadingScreen
+import com.example.weatherappcompose.ui.component.ScreenSection
 
 @Composable
 fun HomeScreen(
@@ -43,7 +49,8 @@ fun HomeScreen(
         is HomeUiState.Loading -> LoadingScreen()
         is HomeUiState.Success -> HomeContent(
             weatherData = uiState.weatherResponse,
-            locationDetail = locationModel
+            locationDetail = locationModel,
+            forecast = uiState.weatherResponse.forecast
         )
 
         is HomeUiState.Error -> Toast.makeText(context, uiState.message, Toast.LENGTH_SHORT).show()
@@ -55,7 +62,8 @@ fun HomeScreen(
 fun HomeContent(
     weatherData: FullWeatherResponse,
     locationDetail: LocationModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    forecast: Forecast
 ) {
     Column(
         modifier = modifier.fillMaxSize(),
@@ -74,6 +82,7 @@ fun HomeContent(
                     .alignByBaseline()
             )
             Text(
+//                text = weatherData.location.name,
                 text = locationDetail.village,
                 fontSize = 34.sp,
                 style = MaterialTheme.typography.titleMedium
@@ -85,14 +94,33 @@ fun HomeContent(
                 .data("http:${weatherData.current.condition.icon}")
                 .build(),
             contentDescription = "condition icon",
-            modifier = Modifier.size(104.dp).padding(top= 32.dp)
+            modifier = Modifier
+                .size(104.dp)
+                .padding(top = 32.dp)
         )
         Text(
             text = weatherData.current.feelslikeC.toString() + "\u2103",
             fontSize = 34.sp,
             style = MaterialTheme.typography.titleLarge
         )
-        Log.d("suhu", "http:${weatherData.current.condition.icon}")
+        ScreenSection(
+            title = "Forecast Today",
+            modifier = Modifier
+                .padding(top = 62.dp)
+                .padding(horizontal = 8.dp)
+        ) {
+            ForecastList(forecastDayItem = forecast.forecastday[0])
+        }
     }
+}
 
+@Composable
+fun ForecastList(
+    forecastDayItem: ForecastdayItem
+) {
+    LazyRow {
+        items(forecastDayItem.hour) { item ->
+            ForecastListItem(forecastDayHourlyItem = item)
+        }
+    }
 }
