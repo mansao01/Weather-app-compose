@@ -2,6 +2,7 @@ package com.example.weatherappcompose.ui.screen.home
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,9 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,10 +18,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.weatherappcompose.R
 import com.example.weatherappcompose.data.model.LocationModel
 import com.example.weatherappcompose.data.network.response.Forecast
 import com.example.weatherappcompose.data.network.response.ForecastdayItem
@@ -74,12 +74,10 @@ fun HomeContent(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = modifier.padding(top = 52.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.LocationOn,
-                contentDescription = null,
-                Modifier
-                    .size(26.dp)
-                    .alignByBaseline()
+
+            Image(
+                painter = painterResource(id = R.drawable.pin_location),
+                contentDescription = null
             )
             Text(
 //                text = weatherData.location.name,
@@ -95,7 +93,7 @@ fun HomeContent(
                 .build(),
             contentDescription = "condition icon",
             modifier = Modifier
-                .size(104.dp)
+                .size(124.dp)
                 .padding(top = 32.dp)
         )
         Text(
