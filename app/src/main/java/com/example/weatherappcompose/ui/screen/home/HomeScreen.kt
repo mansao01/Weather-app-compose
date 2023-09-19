@@ -6,9 +6,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
@@ -96,11 +99,31 @@ fun HomeContent(
                 .size(124.dp)
                 .padding(top = 32.dp)
         )
+        Text(text = weatherData.current.condition.text, modifier = Modifier.padding(bottom = 16.dp))
+
         Text(
             text = weatherData.current.feelslikeC.toString() + "\u2103",
             fontSize = 34.sp,
             style = MaterialTheme.typography.titleLarge
         )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Humidity")
+                Text(text = weatherData.current.humidity.toString())
+            }
+            Spacer(modifier = Modifier.width(20.dp))
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "UV")
+                Text(text = weatherData.current.uv.toString())
+            }
+        }
         ScreenSection(
             title = "Forecast Today",
             modifier = Modifier
