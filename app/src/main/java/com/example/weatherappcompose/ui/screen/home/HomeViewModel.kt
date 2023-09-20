@@ -21,12 +21,12 @@ class HomeViewModel(
     var uiState: HomeUiState by mutableStateOf(HomeUiState.Loading)
         private set
 
-    suspend fun getWeather(location: String) {
+     fun getWeather(location: String) {
         viewModelScope.launch {
             uiState = HomeUiState.Loading
             uiState = try {
                 val result =
-                    weatherRepository.getWeather("efc81045fcaa483e9be103124231409", location)
+                    weatherRepository.getWeather("e8903efcc27a422ebfd100720231409", location)
                 HomeUiState.Success(result)
             } catch (e: IOException) {
                 HomeUiState.Error(e.message.toString())

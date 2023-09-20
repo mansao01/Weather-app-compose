@@ -20,7 +20,7 @@ data class FullWeatherResponse(
 data class HourItem(
 
     @field:SerializedName("feelslike_c")
-    val feelslikeC: @RawValue Any? = null,
+    val feelslikeC: Double? = null,
 
     @field:SerializedName("feelslike_f")
     val feelslikeF: @RawValue Any? = null,
@@ -123,7 +123,8 @@ data class HourItem(
 data class Current(
 
     @field:SerializedName("feelslike_c")
-    val feelslikeC: @RawValue Any? = null,
+    val feelslikeC:  Double? = null,
+//    val feelslikeC: @RawValue Any? = null,
 
     @field:SerializedName("uv")
     val uv: @RawValue Any? = null,

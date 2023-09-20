@@ -19,6 +19,9 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.weatherappcompose.data.network.response.HourItem
+import com.example.weatherappcompose.ui.theme.coolTemp
+import com.example.weatherappcompose.ui.theme.hotTemp
+import com.example.weatherappcompose.ui.theme.warmTemp
 
 @Composable
 fun ForecastListItem(
@@ -44,7 +47,9 @@ fun ForecastListItem(
             modifier = Modifier.fillMaxSize()
         ) {
 
-            Text(text = time, modifier = Modifier.padding(top = 12.dp).padding(bottom = 12.dp))
+            Text(text = time, modifier = Modifier
+                .padding(top = 12.dp)
+                .padding(bottom = 12.dp))
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data("https:${forecastDayHourlyItem.condition.icon}")
@@ -52,7 +57,15 @@ fun ForecastListItem(
                 contentDescription = null,
                 modifier = Modifier.size(82.dp)
             )
-            Text(text = forecastDayHourlyItem.feelslikeC.toString() + "\u2103")
+            Text(
+                text = forecastDayHourlyItem.feelslikeC.toString() + "\u2103",
+                color = when {
+                    forecastDayHourlyItem.feelslikeC!! <= 24.0 -> coolTemp
+                    forecastDayHourlyItem.feelslikeC in 25.0..30.0 -> warmTemp
+                    else -> hotTemp
+
+                }
+            )
 
         }
     }
