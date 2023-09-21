@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -23,8 +24,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -41,7 +49,13 @@ import com.example.weatherappcompose.ui.component.LoadingScreen
 import com.example.weatherappcompose.ui.component.ScreenSection
 import com.example.weatherappcompose.ui.component.WeatherBox
 import com.example.weatherappcompose.ui.theme.coolTemp
+import com.example.weatherappcompose.ui.theme.good
+import com.example.weatherappcompose.ui.theme.hazardous
 import com.example.weatherappcompose.ui.theme.hotTemp
+import com.example.weatherappcompose.ui.theme.moderate
+import com.example.weatherappcompose.ui.theme.unhealthy
+import com.example.weatherappcompose.ui.theme.unhealthyForSensitive
+import com.example.weatherappcompose.ui.theme.veryUnhealthy
 import com.example.weatherappcompose.ui.theme.warmTemp
 
 @Composable
@@ -65,8 +79,9 @@ fun HomeScreen(
 
         is HomeUiState.Error -> {
             ErrorScreen(Modifier.clickable {
-                    homeViewModel.getWeather("${locationModel.latitude},${locationModel.longitude}")
+                homeViewModel.getWeather("${locationModel.latitude},${locationModel.longitude}")
             })
+            Log.d("HomeScreen", uiState.message)
         }
     }
     Log.d("HomeScreen", locationModel.toString())
@@ -117,9 +132,9 @@ fun HomeContent(
             text = weatherData.current.feelslikeC.toString() + "\u2103",
             fontSize = 34.sp,
             style = MaterialTheme.typography.titleLarge,
-            color = when {
-                weatherData.current.feelslikeC!! <= 24.0 -> coolTemp
-                weatherData.current.feelslikeC in 25.0..30.0 -> warmTemp
+            color = when(weatherData.current.feelslikeC!!) {
+                in -10000.0.. 22.0 -> coolTemp
+                in 23.0..30.0 -> warmTemp
                 else -> hotTemp
 
             }
@@ -132,12 +147,42 @@ fun HomeContent(
 
             WeatherBox(
                 key = "Humidity",
-                value = weatherData.current.humidity.toString()
+                value = weatherData.current.humidity.toString(),
+                textColor = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.width(20.dp))
             WeatherBox(
                 key = "UV",
-                value = weatherData.current.uv.toString()
+                value = weatherData.current.uv.toString(),
+                textColor = MaterialTheme.colorScheme.primary
+
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+
+            WeatherBox(
+                key = "PM2.5",
+                value = weatherData.current.airQuality?.pm25.toString(),
+                textColor = when (weatherData.current.airQuality?.pm25!!) {
+                    in 0.0..12.0 -> good
+                    in 13.0..35.0 -> moderate
+                    in 36.0..55.0 -> unhealthyForSensitive
+                    in 56.0..150.0 -> unhealthy
+                    in 150.0..250.0 -> veryUnhealthy
+                    else -> hazardous
+                }
+
+            )
+            Spacer(modifier = Modifier.width(20.dp))
+            WeatherBox(
+                key = "CO",
+                value = weatherData.current.airQuality.co.toString(),
+                textColor = MaterialTheme.colorScheme.primary
+
             )
         }
         ScreenSection(
@@ -148,7 +193,10 @@ fun HomeContent(
         ) {
             ForecastList(forecastDayItem = forecast.forecastday[0])
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+        HyperlinkText(fullText = "Powered by WeatherApi.com", linkText = listOf("WeatherApi.com"))
+        Spacer(modifier = Modifier.height(22.dp))
+
     }
 }
 
@@ -161,4 +209,62 @@ fun ForecastList(
             ForecastListItem(forecastDayHourlyItem = item)
         }
     }
+}
+
+@Composable
+fun HyperlinkText(
+    modifier: Modifier = Modifier,
+    fullText: String,
+    linkText: List<String>,
+    linkTextColor: Color = MaterialTheme.colorScheme.primary,
+    linkTextFontWeight: FontWeight = FontWeight.Medium,
+    linkTextDecoration: TextDecoration = TextDecoration.Underline,
+    hyperlinks: List<String> = listOf("https://www.weatherapi.com/"),
+    fontSize: TextUnit = TextUnit.Unspecified
+) {
+    val annotatedString = buildAnnotatedString {
+        append(fullText)
+        linkText.forEachIndexed { index, link ->
+            val startIndex = fullText.indexOf(link)
+            val endIndex = startIndex + link.length
+            addStyle(
+                style = SpanStyle(
+                    color = linkTextColor,
+                    fontSize = fontSize,
+                    fontWeight = linkTextFontWeight,
+                    textDecoration = linkTextDecoration
+                ),
+                start = startIndex,
+                end = endIndex
+            )
+            addStringAnnotation(
+                tag = "URL",
+                annotation = hyperlinks[index],
+                start = startIndex,
+                end = endIndex
+            )
+        }
+        addStyle(
+            style = SpanStyle(
+                fontSize = fontSize
+            ),
+            start = 0,
+            end = fullText.length
+
+        )
+    }
+
+    val uriHandler = LocalUriHandler.current
+
+    ClickableText(
+        modifier = modifier,
+        text = annotatedString,
+        onClick = {
+            annotatedString
+                .getStringAnnotations("URL", it, it)
+                .firstOrNull()?.let { stringAnnotation ->
+                    uriHandler.openUri(stringAnnotation.item)
+                }
+        },
+    )
 }

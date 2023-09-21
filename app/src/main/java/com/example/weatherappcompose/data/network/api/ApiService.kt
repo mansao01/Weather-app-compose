@@ -10,6 +10,8 @@ interface ApiService {
         @Query("key")
         key: String,
         @Query("q")
-        q: String
+        q: String,
+        @Query("aqi")
+        aqi:String = "yes"
     ):FullWeatherResponse
 }

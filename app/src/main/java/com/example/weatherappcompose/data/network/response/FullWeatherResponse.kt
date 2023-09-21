@@ -168,6 +168,9 @@ data class Current(
     @field:SerializedName("precip_mm")
     val precipMm: @RawValue Any? = null,
 
+    @field:SerializedName("air_quality")
+    val airQuality: AirQuality? = null,
+
     @field:SerializedName("cloud")
     val cloud: Int,
 
@@ -218,9 +221,19 @@ data class Forecast(
 
     @field:SerializedName("forecastday")
     val forecastday: List<ForecastdayItem>
-) 
+)
 
-
+data class AirQuality(
+    val o3: Any? = null,
+    val so2: Any? = null,
+    val no2: Any? = null,
+    @field:SerializedName("pm2_5")
+    val pm25: Double? = null,
+    val pm10: Any? = null,
+    val co: Any? = null,
+    val usEpaIndex: Int? = null,
+    val gbDefraIndex: Int? = null
+)
 data class Condition(
 
     @field:SerializedName("code")

@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 fun WeatherBox(
     key: String,
     value: String,
+    textColor: Color,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -42,7 +44,7 @@ fun WeatherBox(
             Text(
                 text = value,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = textColor
             )
         }
     }
@@ -51,5 +53,5 @@ fun WeatherBox(
 @Preview
 @Composable
 fun BoxPreview() {
-    WeatherBox(key = "uv", value ="3.2" )
+    WeatherBox(key = "uv", value ="3.2" , textColor = MaterialTheme.colorScheme.primary)
 }

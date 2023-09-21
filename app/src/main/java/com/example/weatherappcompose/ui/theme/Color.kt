@@ -68,3 +68,11 @@ val md_theme_dark_scrim = Color(0xFF000000)
 val coolTemp = Color(0xFF2196F3)
 val warmTemp = Color(0xFFFDD835)
 val hotTemp = Color(0xFFF44336)
+
+//pm2.5 color levels
+val good = Color(0XFF3CFF32)
+val moderate = Color(0xFFFDD835)
+val unhealthyForSensitive = Color(0XFFFF9600)
+val unhealthy = Color(0XFFFF0817)
+val veryUnhealthy = Color(0XFFB162FF)
+val hazardous = Color(0XFF2B0E87)
