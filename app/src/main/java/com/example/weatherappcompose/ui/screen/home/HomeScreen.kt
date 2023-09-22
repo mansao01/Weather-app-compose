@@ -146,6 +146,25 @@ fun HomeContent(
         ) {
 
             WeatherBox(
+                key = "Sunrise",
+                value = weatherData.forecast.forecastday[0].astro.sunrise,
+                textColor = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(20.dp))
+            WeatherBox(
+                key = "Sunset",
+                value = weatherData.forecast.forecastday[0].astro.moonset,
+                textColor = MaterialTheme.colorScheme.primary
+
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+
+            WeatherBox(
                 key = "Humidity",
                 value = weatherData.current.humidity.toString(),
                 textColor = MaterialTheme.colorScheme.primary
